@@ -45,7 +45,7 @@ export default function Home() {
   const rows = [kaomojis_list.slice(0, 30), kaomojis_list.slice(30, 60), kaomojis_list.slice(40, 70), kaomojis_list.slice(60, 90), kaomojis_list.slice(90, 120), kaomojis_list.slice(120, 150), kaomojis_list.slice(0, 30), kaomojis_list.slice(30, 60), kaomojis_list.slice(60, 90), kaomojis_list.slice(90, 120), kaomojis_list.slice(120, 150), kaomojis_list.slice(0, 30)];
 
   return (
-    <div className="flex flex-col h-screen items-center bg-zinc-50 font-sans overflow-x-hidden">
+    <div className="flex flex-col h-screen py-8 items-center bg-zinc-50 font-sans overflow-x-hidden">
       <style jsx>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -79,7 +79,7 @@ export default function Home() {
         ))}
       </div>
 
-      <main className="  mx-auto  mt-12 mb-8">
+      <main className="  mx-auto mb-8">
         <img
           className="absolute"
           src="https://media.tenor.com/VmOouMXHqTsAAAAi/pom-pom-purin-pompompurin.gif"
@@ -96,22 +96,22 @@ export default function Home() {
         </div>
       </main>
 
-      <div className="rounded-xl flex z-50 mx-auto w-3xl">
+      <div className="rounded-xl flex z-50 mx-auto max-md:w-[90%] w-3xl">
         <input
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder={placeholders[selected]}
-          className="focus:ring-pink-100 text-[#A59389] rounded-l-lg px-4 border border-[#A59389] ring-pink-200 bg-white py-4 text-xl w-full"
+          className="focus:ring-pink-100 w-full text-[#A59389] rounded-l-lg px-4 border border-[#A59389] ring-pink-200 bg-white py-4 text-xl"
         />
         <button
           onClick={handleDownload}
-          className="h-full bg-pink-300 w-40 text-xl cursor-pointer rounded-r-lg"
+          className="h-full bg-pink-300 md:w-40 w-32 text-xl cursor-pointer rounded-r-lg"
         >
           {loading ? "..." : "Baixar"}
         </button>
       </div>
 
-      <nav className="flex gap-8 items-center mt-12 justify-around w-[90%]">
+      <nav className="flex max-md:flex-col gap-8 items-center mt-12 justify-around w-[90%]">
 
         {/* YouTube */}
 
