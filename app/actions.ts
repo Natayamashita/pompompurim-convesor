@@ -1,57 +1,71 @@
 "use server";
 
-// Importando as exportações nomeadas exatas conforme os usages CJS
-const { igdl, ttdl, youtube } = require('btch-downloader');
+import { igdl, youtube } from 'btch-downloader';
+const btch = require('btch-downloader');
 
-export async function downloadVideo(url, type) {
+export async function downloadVideo(url: string, type: "youtube" | "tiktok" | "instagram") {
   try {
-    let result;
+    let result: any;
 
-    // Execução baseada no tipo, chamando a função correta da lib
-    if (type === "instagram") {
-      if (!igdl) throw new Error("Exportação 'igdl' não encontrada.");
-      result = await igdl(url);
-    } 
-    else if (type === "tiktok") {
-      if (!ttdl) throw new Error("Exportação 'ttdl' não encontrada.");
-      result = await ttdl(url);
-    } 
-    else if (type === "youtube") {
-      if (!youtube) throw new Error("Exportação 'youtube' não encontrada.");
+    // Chamadas de API
+    if (type === "youtube") {
       result = await youtube(url);
     }
+    else if (type === "tiktok") {
+      // Voltando para o modelo original do tiktok que funcionava
+      const ttFunc = btch.tiktok || btch.tt || btch.ttdl;
+      result = await ttFunc(url);
+    }
+    else if (type === "instagram") {
+      result = await igdl(url);
+    }
 
-    console.log(`[DEBUG] Resposta Bruta ${type}:`, result);
+    console.log(`[DEBUG] Resultado bruto do ${type}:`, result);
 
     let downloadUrl = "";
 
-    // Extração baseada no formato de retorno de cada função
+    // EXTRAÇÃO DE DADOS BASEADA NOS SEUS LOGS
     if (type === "instagram") {
-      // igdl geralmente retorna Array de strings ou objetos
-      if (Array.isArray(result)) {
-        const item = result[0];
-        downloadUrl = typeof item === 'string' ? item : (item.url || item.link);
-      } else {
-        downloadUrl = result.url || result.link || result.result?.[0]?.url || "";
+      // De acordo com seu log, o link está em: result.result[0].url
+      if (result.result && Array.isArray(result.result) && result.result.length > 0) {
+        downloadUrl = result.result[0].url;
       }
-    } 
+      // Fallback para o formato antigo caso a lib mude
+      else if (Array.isArray(result)) {
+        downloadUrl = typeof result[0] === 'string' ? result[0] : result[0].url;
+      } else {
+        downloadUrl = result.url || "";
+      }
+    }
+
     else if (type === "tiktok") {
-      // ttdl costuma retornar links com e sem marca d'água
-      downloadUrl = result.video || result.nowm || result.url || (result.result ? result.result.video : "");
-    } 
+      // Verificamos se há mais de um link no array
+      if (result.video && Array.isArray(result.video)) {
+        // Priorizamos o link 'nowm' (no watermark) se a lib oferecer em outro campo, 
+        // ou tentamos o segundo link do array caso exista (pode ser o formato compatível)
+        downloadUrl = result.nowm || result.video[0];
+
+        // Se o primeiro link falhar ou você quiser dar a opção de maior compatibilidade:
+        // downloadUrl = result.video[1] || result.video[0]; 
+      } else {
+        downloadUrl = result.nowm || result.video || (result.result ? result.result.video : "");
+      }
+    }
+
     else if (type === "youtube") {
-      // youtube retorna as qualidades disponíveis
+      // Mantendo o que você confirmou que já funciona
       downloadUrl = result.mp4 || result.url || (result.result ? result.result.url : "");
     }
 
+    // Validação final
     if (!downloadUrl || typeof downloadUrl !== 'string' || !downloadUrl.startsWith('http')) {
-      throw new Error(`Não foi possível extrair o link de download válido para ${type}.`);
+      throw new Error(`Link de download .mp4 não encontrado para ${type}.`);
     }
 
     return { success: true, downloadUrl };
 
-  } catch (error) {
-    console.error("Erro na Server Action:", error);
+  } catch (error: any) {
+    console.error(`Erro na Server Action (${type}):`, error);
     return { success: false, error: error.message };
   }
 }
