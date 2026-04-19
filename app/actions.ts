@@ -9,6 +9,7 @@ export async function downloadVideo(url: string, type: "youtube" | "tiktok" | "i
 
     // Chamadas de API
     if (type === "youtube") {
+      console.log(url,'YOUTUBE')
       result = await youtube(url);
     }
     else if (type === "tiktok") {
